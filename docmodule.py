@@ -141,8 +141,8 @@ def upload_to_google_sheets(json_data: list[dict[str, Any]], sheet_id: str, cred
     import gspread
 
     import streamlit as st
-credentials = dict(st.secrets["gcp_service_account"])
-gc = gspread.service_account_from_dict(credentials)
+    credentials = dict(st.secrets["gcp_service_account"])
+    gc = gspread.service_account_from_dict(credentials)
 
     sh = gc.open_by_key(sheet_id)
     worksheet = sh.get_worksheet(0)
