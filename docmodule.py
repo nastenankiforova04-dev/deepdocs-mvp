@@ -18,7 +18,7 @@ def extract_data(file):
     summ_regex = r"(?:стоимость|сумма|сумму|цена|всего)\D{0,100}?(\d[\d\s,.]*?\d)\s*(?:\([^)]+\)\s*)?(?:руб|₽|usd|евро)"
 
     results = {
-        "number": "Не найден",
+        "number": "",
         "dates": [],
         "all_parties": [],
         "conditions": [],
@@ -42,7 +42,7 @@ def extract_data(file):
             if p_party.strip() not in results["all_parties"]:
                 results["all_parties"].append(p_party.strip())
 
-        if results["number"] == "Не найден":
+        if results["number"] == "":
             match_no = re.search(number_regex, text, re.I)
             if match_no:
                 results["number"] = match_no.group(1)
@@ -110,7 +110,7 @@ def extract_data(file):
         results["Предмет_договора"] = non_repetitive_conditions[index_start + 1:index_end]
 
     except StopIteration:
-        results["Предмет_договора"] = ["Не найдены"]
+        results["Предмет_договора"] = [""]
 
     def clear_summ(summ: str):
         clean_amount = re.sub(r'[^\d,.]', '', summ)
@@ -153,10 +153,12 @@ def upload_to_google_sheets(json_data: list[dict[str, Any]], sheet_id: str, cred
     cleaned_rows = [[str(cell) if pd.notna(cell) else "" for cell in row] for row in rows]
 
     existing_data = worksheet.get_all_values()
+    header = df.columns.tolist()
+
     if not existing_data:
-        # Если таблица абсолютно пустая - сначала вставляем названия колонок
-        header = df.columns.tolist()
         worksheet.append_row(header)
+    elif existing_data[0] != header:
+        worksheet.insert_row(header, 1)
 
     worksheet.append_rows(cleaned_rows)
 
